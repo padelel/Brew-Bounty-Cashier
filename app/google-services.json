@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "891623390210",
+    "firebase_url": "https://point-of-sale-6a0d1-default-rtdb.firebaseio.com",
+    "project_id": "point-of-sale-6a0d1",
+    "storage_bucket": "point-of-sale-6a0d1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:891623390210:android:914028d2bd8046a92dfb1b",
+        "android_client_info": {
+          "package_name": "com.example.pointofsale"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBh4xGRRr3AMzy06I3CwCPSpKKRkQ2v_zI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:891623390210:android:a1426e01ba19fac02dfb1b",
+        "android_client_info": {
+          "package_name": "com.example.projek1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBh4xGRRr3AMzy06I3CwCPSpKKRkQ2v_zI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
