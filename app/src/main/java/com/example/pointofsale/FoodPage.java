@@ -46,7 +46,6 @@ public class FoodPage extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_food_page);
         foodView = findViewById(R.id.food_view);
-        btnAdd = findViewById(R.id.btnAdd);
         db = FirebaseFirestore.getInstance();
 
         foodView.setHasFixedSize(true);
@@ -61,24 +60,6 @@ public class FoodPage extends AppCompatActivity {
             public void onClick(int pos) {
                 final CharSequence[] dialogItem = {"Edit", "Hapus"};
                 AlertDialog.Builder dialog = new AlertDialog.Builder(FoodPage.this);
-                dialog.setItems(dialogItem, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        switch (i) {
-                            case 0:
-                                Intent intent = new Intent(getApplicationContext(), AddFood.class);
-                                intent.putExtra("id", foodlist.get(pos).getId());
-                                intent.putExtra("product", foodlist.get(pos).getProduct());
-                                intent.putExtra("price", foodlist.get(pos).getPrice());
-                                startActivity(intent);
-                                break;
-                            case 1:
-                                deleteData(foodlist.get(pos).getId());
-                                break;
-
-                        }
-                    }
-                });
                 dialog.show();
             }
         });
@@ -104,9 +85,6 @@ public class FoodPage extends AppCompatActivity {
 
         });
 
-        btnAdd.setOnClickListener(v -> {
-            startActivity(new Intent(getApplicationContext(), AddFood.class));
-        });
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override

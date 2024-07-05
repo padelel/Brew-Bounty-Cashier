@@ -1,22 +1,22 @@
 {
   "project_info": {
-    "project_number": "891623390210",
-    "firebase_url": "https://point-of-sale-6a0d1-default-rtdb.firebaseio.com",
-    "project_id": "point-of-sale-6a0d1",
-    "storage_bucket": "point-of-sale-6a0d1.appspot.com"
+    "project_number": "108525876940",
+    "firebase_url": "https://brew-bounty-admin-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "brew-bounty-admin",
+    "storage_bucket": "brew-bounty-admin.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:891623390210:android:914028d2bd8046a92dfb1b",
+        "mobilesdk_app_id": "1:108525876940:android:41e87c18e416ad7d65f469",
         "android_client_info": {
-          "package_name": "com.example.pointofsale"
+          "package_name": "com.android.application"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBh4xGRRr3AMzy06I3CwCPSpKKRkQ2v_zI"
+          "current_key": "AIzaSyAEnLDJ1eE3BgtqxBMSFP0vblTFwwzgUZc"
         }
       ],
       "services": {
@@ -27,15 +27,15 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:891623390210:android:a1426e01ba19fac02dfb1b",
+        "mobilesdk_app_id": "1:108525876940:android:b76619c267834ed265f469",
         "android_client_info": {
-          "package_name": "com.example.projek1"
+          "package_name": "com.example.pointofsale"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBh4xGRRr3AMzy06I3CwCPSpKKRkQ2v_zI"
+          "current_key": "AIzaSyAEnLDJ1eE3BgtqxBMSFP0vblTFwwzgUZc"
         }
       ],
       "services": {

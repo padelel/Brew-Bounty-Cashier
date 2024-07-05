@@ -47,7 +47,6 @@ public class DrinkPage extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_drink_page);
         drinkView = findViewById(R.id.drink_view);
-        btnAdd = findViewById(R.id.btnAdd);
         db = FirebaseFirestore.getInstance();
 
         drinkView.setHasFixedSize(true);
@@ -58,32 +57,7 @@ public class DrinkPage extends AppCompatActivity {
 
         drinkAdapter = new DrinkAdapter(getApplicationContext(), drinklist);
         drinkView.setAdapter(drinkAdapter);
-        drinkAdapter.setDialog(new DrinkAdapter.Dialog() {
-            @Override
-            public void onClick(int pos) {
-                final CharSequence[] dialogItem = {"Edit", "Hapus"};
-                AlertDialog.Builder dialog = new AlertDialog.Builder(DrinkPage.this);
-                dialog.setItems(dialogItem, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        switch (i) {
-                            case 0:
-                                Intent intent = new Intent(getApplicationContext(), AddDrink.class);
-                                intent.putExtra("id", drinklist.get(pos).getId());
-                                intent.putExtra("product", drinklist.get(pos).getProduct());
-                                intent.putExtra("price", drinklist.get(pos).getPrice());
-                                startActivity(intent);
-                                break;
-                            case 1:
-                                deleteData(drinklist.get(pos).getId());
-                                break;
 
-                        }
-                    }
-                });
-                dialog.show();
-            }
-        });
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false);
         RecyclerView.ItemDecoration decoration = new DividerItemDecoration(getApplicationContext(), DividerItemDecoration.VERTICAL);
@@ -104,10 +78,6 @@ public class DrinkPage extends AppCompatActivity {
                 startActivity(back);
             }
 
-        });
-
-        btnAdd.setOnClickListener(v -> {
-            startActivity(new Intent(getApplicationContext(), AddDrink.class));
         });
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -157,21 +127,6 @@ public class DrinkPage extends AppCompatActivity {
                             Toast.makeText(getApplicationContext(), "Data gagal di ambil!", Toast.LENGTH_SHORT).show();
                         }
                         progressDialog.dismiss();
-                    }
-                });
-    }
-    private void deleteData(String id) {
-        progressDialog.show();
-        db.collection("drink").document(id)
-                .delete()
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (!task.isSuccessful()) {
-                            Toast.makeText(getApplicationContext(), "Data gagal di hapus!", Toast.LENGTH_SHORT).show();
-                        }
-                        progressDialog.dismiss();
-                        getData();
                     }
                 });
     }

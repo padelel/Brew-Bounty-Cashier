@@ -15,26 +15,14 @@
         android:theme="@style/Theme.Pointofsale"
         tools:targetApi="31">
         <activity
-            android:name=".EditOrder"
-            android:exported="false" />
-        <activity
-            android:name=".Register"
-            android:exported="false" />
-        <activity
-            android:name=".AddDrink"
-            android:exported="false" />
-        <activity
             android:name=".DrinkPage"
             android:exported="false" />
         <activity
             android:name=".Category"
             android:exported="false" />
         <activity
-            android:name=".AddFood"
-            android:exported="false" />
-        <activity
             android:name=".AddCustomer"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".OrderPage"
             android:exported="false"
