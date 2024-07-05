@@ -3,25 +3,17 @@ package com.example.pointofsale.model;
 public class Drink {
     private String id;
     private String name;
-    private String price;
     private String category;
     private String description;
-    private String imageUrl;
+    private String imageURL;
+    private String price;
 
-    public Drink(String name, String price, String category, String description, String imageUrl) {
+    public Drink(String name, String category, String description, String imageURL, String price) {
         this.name = name;
+        this.category = category;
+        this.description = description;
+        this.imageURL = imageURL;
         this.price = price;
-        this.category = this.category;
-        this.description = this.description;
-        this.imageUrl = this.imageUrl;
-    }
-
-    public Drink() {
-        this.name = "";
-        this.price = "";
-        this.category = "";
-        this.description = "";
-        this.imageUrl = "";
     }
 
     public String getId() {
@@ -40,14 +32,6 @@ public class Drink {
         this.name = name;
     }
 
-    public String getPrice() {
-        return price;
-    }
-
-    public void setPrice(String price) {
-        this.price = price;
-    }
-
     public String getCategory() {
         return category;
     }
@@ -64,11 +48,19 @@ public class Drink {
         this.description = description;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
+    public String getImageURL() {
+        return imageURL;
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public void setImageURL(String imageURL) {
+        this.imageURL = imageURL;
+    }
+
+    public String getPrice() {
+        return price;
+    }
+
+    public void setPrice(String price) {
+        this.price = price;
     }
 }

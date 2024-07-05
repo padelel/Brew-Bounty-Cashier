@@ -10,18 +10,17 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
-import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.pointofsale.adapter.DrinkAdapter;
 import com.example.pointofsale.model.Drink;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,54 +28,30 @@ import java.util.List;
 public class DrinkPage extends AppCompatActivity {
 
     Button btnBack;
-
-    FloatingActionButton btnAdd;
     SearchView searchView;
     RecyclerView drinkView;
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    DatabaseReference dbRef;
     List<Drink> drinklist = new ArrayList<>();
     DrinkAdapter drinkAdapter;
     ProgressDialog progressDialog;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_drink_page);
-        drinkView = findViewById(R.id.drink_view);
-        db = FirebaseFirestore.getInstance();
 
+        // Inisialisasi RecyclerView dan layout manager
+        drinkView = findViewById(R.id.drink_view);
         drinkView.setHasFixedSize(true);
         drinkView.setLayoutManager(new LinearLayoutManager(this));
-        searchView = findViewById(R.id.searchView);
-        drinklist = new ArrayList<>();
-
-
         drinkAdapter = new DrinkAdapter(getApplicationContext(), drinklist);
         drinkView.setAdapter(drinkAdapter);
 
+        // Inisialisasi Firebase Realtime Database
+        dbRef = FirebaseDatabase.getInstance().getReference().child("menu").child("drink");
 
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false);
-        RecyclerView.ItemDecoration decoration = new DividerItemDecoration(getApplicationContext(), DividerItemDecoration.VERTICAL);
-        drinkView.setLayoutManager(layoutManager);
-        drinkView.addItemDecoration(decoration);
-        drinkView.setAdapter(drinkAdapter);
-
-        progressDialog = new ProgressDialog(DrinkPage.this);
-        progressDialog.setTitle("Loading");
-        progressDialog.setMessage("Mengambil data...");
-
-        btnBack = findViewById(R.id.btnBack);
-
-        btnBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent back = new Intent(DrinkPage.this, Category.class);
-                startActivity(back);
-            }
-
-        });
-
+        // Setup SearchView
+        searchView = findViewById(R.id.searchView);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -97,76 +72,82 @@ public class DrinkPage extends AppCompatActivity {
             }
         });
 
-    }
+        // Setup ProgressDialog
+        progressDialog = new ProgressDialog(DrinkPage.this);
+        progressDialog.setTitle("Loading");
+        progressDialog.setMessage("Mengambil data...");
 
-    @Override
-    protected void onStart() {
-        super.onStart();
+        // Button Back
+        btnBack = findViewById(R.id.btnBack);
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent back = new Intent(DrinkPage.this, Category.class);
+                startActivity(back);
+            }
+        });
+
+        // Retrieve data on start
         getData();
     }
 
-    // Dalam metode getData()
-    private void getData(){
+    // Method to fetch data from Realtime Database
+    private void getData() {
         progressDialog.show();
-        db.collection("drink")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        drinklist.clear();
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                String name = document.getString("product");
-                                String price = document.getString("price");
-                                String category = document.getString("category"); // Sesuaikan dengan field yang ada di Firestore
-                                String description = document.getString("description"); // Sesuaikan dengan field yang ada di Firestore
-                                String imageUrl = document.getString("imageUrl"); // Sesuaikan dengan field yang ada di Firestore
+        dbRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                drinklist.clear();
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    String id = snapshot.getKey();
+                    String name = snapshot.child("name").getValue(String.class);
+                    String category = snapshot.child("category").getValue(String.class);
+                    String description = snapshot.child("description").getValue(String.class);
+                    String imageURL = snapshot.child("imageURL").getValue(String.class);
+                    String price = snapshot.child("price").getValue(String.class);
 
-                                Drink drink = new Drink(name, price, category, description, imageUrl);
-                                drink.setId(document.getId());
-                                drinklist.add(drink);
-                            }
-                            drinkAdapter.notifyDataSetChanged();
-                        } else {
-                            Toast.makeText(getApplicationContext(), "Data gagal di ambil!", Toast.LENGTH_SHORT).show();
-                        }
-                        progressDialog.dismiss();
-                    }
-                });
+                    Drink drink = new Drink(name, category, description, imageURL, price);
+                    drink.setId(id);
+                    drinklist.add(drink);
+                }
+                drinkAdapter.notifyDataSetChanged();
+                progressDialog.dismiss();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(getApplicationContext(), "Gagal mengambil data: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                progressDialog.dismiss();
+            }
+        });
     }
 
-    // Dalam metode performSearch()
+    // Method untuk melakukan pencarian
     private void performSearch(String query) {
-        drinklist.clear();
+        Query searchQuery = dbRef.orderByChild("name").startAt(query).endAt(query + "\uf8ff");
+        searchQuery.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                drinklist.clear();
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    String id = snapshot.getKey();
+                    String name = snapshot.child("name").getValue(String.class);
+                    String category = snapshot.child("category").getValue(String.class);
+                    String description = snapshot.child("description").getValue(String.class);
+                    String imageURL = snapshot.child("imageURL").getValue(String.class);
+                    String price = snapshot.child("price").getValue(String.class);
 
-        // Jika query tidak kosong, lakukan pencarian
-        if (!query.isEmpty()) {
-            db.collection("drink")
-                    .whereGreaterThanOrEqualTo("product", query)
-                    .whereLessThanOrEqualTo("product", query + "\uf8ff") // \uf8ff adalah karakter Unicode yang digunakan untuk melakukan pencarian rentang
-                    .get()
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                String name = document.getString("product");
-                                String price = document.getString("price");
-                                String category = document.getString("category"); // Sesuaikan dengan field yang ada di Firestore
-                                String description = document.getString("description"); // Sesuaikan dengan field yang ada di Firestore
-                                String imageUrl = document.getString("imageUrl"); // Sesuaikan dengan field yang ada di Firestore
+                    Drink drink = new Drink(name, category, description, imageURL, price);
+                    drink.setId(id);
+                    drinklist.add(drink);
+                }
+                drinkAdapter.notifyDataSetChanged();
+            }
 
-                                Drink drink = new Drink(name, price, category, description, imageUrl);
-                                drink.setId(document.getId());
-                                drinklist.add(drink);
-                            }
-                            drinkAdapter.notifyDataSetChanged();
-                        } else {
-                            // Tangani kegagalan query jika diperlukan
-                            // Contoh: Log.e(TAG, "Error getting documents: ", task.getException());
-                        }
-                    });
-        } else {
-            // Jika query kosong, tampilkan semua data
-            getData();
-        }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(getApplicationContext(), "Gagal melakukan pencarian: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

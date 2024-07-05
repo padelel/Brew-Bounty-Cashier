@@ -5,8 +5,8 @@ public class Food {
     private String name;
     private String category;
     private String description;
-    private String imageURL; // Diganti dari imageUrl
-    private String price; // Tipe data price diubah menjadi String
+    private String imageURL;
+    private String price;
 
     public Food(String name, String category, String description, String imageURL, String price) {
         this.name = name;
