@@ -1,16 +1,19 @@
 package com.example.pointofsale.model;
 
 public class Food {
-    private String id, product, price;
+    private String id;
+    private String name;
+    private String category;
+    private String description;
+    private String imageURL; // Diganti dari imageUrl
+    private String price; // Tipe data price diubah menjadi String
 
-    public Food (String product, String price){
-        this.product = product;
+    public Food(String name, String category, String description, String imageURL, String price) {
+        this.name = name;
+        this.category = category;
+        this.description = description;
+        this.imageURL = imageURL;
         this.price = price;
-    }
-
-    public Food (){
-        this.product = "";
-        this.price = "";
     }
 
     public String getId() {
@@ -21,12 +24,36 @@ public class Food {
         this.id = id;
     }
 
-    public String getProduct() {
-        return product;
+    public String getName() {
+        return name;
     }
 
-    public void setProduct(String product) {
-        this.product = product;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getImageURL() {
+        return imageURL;
+    }
+
+    public void setImageURL(String imageURL) {
+        this.imageURL = imageURL;
     }
 
     public String getPrice() {

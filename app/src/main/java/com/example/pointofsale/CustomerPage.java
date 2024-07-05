@@ -1,7 +1,5 @@
 package com.example.pointofsale;
 
-import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
-
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -21,12 +19,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.pointofsale.adapter.CustomerAdapter;
 import com.example.pointofsale.model.Customer;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,15 +32,13 @@ import java.util.List;
 public class CustomerPage extends AppCompatActivity {
 
     Button btnBack;
-
     FloatingActionButton btnAdd;
     SearchView searchView;
     RecyclerView customerView;
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    DatabaseReference db;
     List<Customer> customerlist = new ArrayList<>();
     CustomerAdapter customerAdapter;
     ProgressDialog progressDialog;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,13 +46,12 @@ public class CustomerPage extends AppCompatActivity {
         setContentView(R.layout.activity_customer_page);
         customerView = findViewById(R.id.customer_view);
         btnAdd = findViewById(R.id.btnAdd);
-        db = FirebaseFirestore.getInstance();
+        db = FirebaseDatabase.getInstance().getReference("customers");
 
         customerView.setHasFixedSize(true);
         customerView.setLayoutManager(new LinearLayoutManager(this));
         searchView = findViewById(R.id.searchView);
         customerlist = new ArrayList<>();
-
 
         customerAdapter = new CustomerAdapter(getApplicationContext(), customerlist);
         customerView.setAdapter(customerAdapter);
@@ -81,7 +76,6 @@ public class CustomerPage extends AppCompatActivity {
                             case 1:
                                 deleteData(customerlist.get(pos).getId());
                                 break;
-
                         }
                     }
                 });
@@ -100,19 +94,15 @@ public class CustomerPage extends AppCompatActivity {
         progressDialog.setMessage("Mengambil data...");
 
         btnBack = findViewById(R.id.btnBack);
-
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent back = new Intent(CustomerPage.this, HomePage.class);
                 startActivity(back);
             }
-
         });
 
-        btnAdd.setOnClickListener(v -> {
-            startActivity(new Intent(getApplicationContext(), AddCustomer.class));
-        });
+        btnAdd.setOnClickListener(v -> startActivity(new Intent(getApplicationContext(), AddCustomer.class)));
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -127,8 +117,7 @@ public class CustomerPage extends AppCompatActivity {
                     customerlist.clear();
                     customerAdapter.notifyDataSetChanged();
                     getData();
-                }
-                else {
+                } else {
                     performSearch(newText);
                 }
                 return false;
@@ -142,68 +131,62 @@ public class CustomerPage extends AppCompatActivity {
         getData();
     }
 
-    private void getData(){
+    private void getData() {
         progressDialog.show();
-        db.collection("customer")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        customerlist.clear();
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Customer customer = new Customer(document.getString("name"), document.getString("email"), document.getString("address"), document.getString("phone"));
-                                customer.setId(document.getId());
-                                customerlist.add(customer);
-                            }
-                            customerAdapter.notifyDataSetChanged();
-                        }else{
-                            Toast.makeText(getApplicationContext(), "Data gagal di ambil!", Toast.LENGTH_SHORT).show();
-                        }
-                        progressDialog.dismiss();
-                    }
-                });
+        db.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                customerlist.clear();
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    Customer customer = dataSnapshot.getValue(Customer.class);
+                    customer.setId(dataSnapshot.getKey());
+                    customerlist.add(customer);
+                }
+                customerAdapter.notifyDataSetChanged();
+                progressDialog.dismiss();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                progressDialog.dismiss();
+                Toast.makeText(getApplicationContext(), "Data gagal di ambil!", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
+
     private void deleteData(String id) {
         progressDialog.show();
-        db.collection("customer").document(id)
-                .delete()
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (!task.isSuccessful()) {
-                            Toast.makeText(getApplicationContext(), "Data gagal di hapus!", Toast.LENGTH_SHORT).show();
-                        }
-                        progressDialog.dismiss();
-                        getData();
-                    }
-                });
+        db.child(id).removeValue().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                Toast.makeText(getApplicationContext(), "Data gagal di hapus!", Toast.LENGTH_SHORT).show();
+            }
+            progressDialog.dismiss();
+            getData();
+        });
     }
 
     private void performSearch(String query) {
         customerlist.clear();
 
-        // Jika query tidak kosong, lakukan pencarian
         if (!query.isEmpty()) {
-            db.collection("customer")
-                    .whereGreaterThanOrEqualTo("name", query)
-                    .whereLessThanOrEqualTo("name", query + "\uf8ff") // \uf8ff adalah karakter Unicode yang digunakan untuk melakukan pencarian rentang
-                    .get()
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Customer customer = document.toObject(Customer.class);
-                                customerlist.add(customer);
-                            }
-                            customerAdapter.notifyDataSetChanged();
-                        } else {
-                            // Tangani kegagalan query jika diperlukan
-                            // Contoh: Log.e(TAG, "Error getting documents: ", task.getException());
-                        }
-                    });
+            db.orderByChild("name").startAt(query).endAt(query + "\uf8ff").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                        Customer customer = dataSnapshot.getValue(Customer.class);
+                        customer.setId(dataSnapshot.getKey());
+                        customerlist.add(customer);
+                    }
+                    customerAdapter.notifyDataSetChanged();
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    // Handle error if necessary
+                }
+            });
         } else {
-            // Jika query kosong, tampilkan semua data
-           getData();
+            getData();
         }
     }
 }

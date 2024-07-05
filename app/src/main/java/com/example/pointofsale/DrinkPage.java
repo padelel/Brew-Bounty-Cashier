@@ -1,8 +1,6 @@
 package com.example.pointofsale;
 
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -18,7 +16,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.pointofsale.adapter.DrinkAdapter;
 import com.example.pointofsale.model.Drink;
-import com.example.pointofsale.model.Food;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -108,6 +105,7 @@ public class DrinkPage extends AppCompatActivity {
         getData();
     }
 
+    // Dalam metode getData()
     private void getData(){
         progressDialog.show();
         db.collection("drink")
@@ -118,12 +116,18 @@ public class DrinkPage extends AppCompatActivity {
                         drinklist.clear();
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                Drink drink = new Drink(document.getString("product"), document.getString("price"));
+                                String name = document.getString("product");
+                                String price = document.getString("price");
+                                String category = document.getString("category"); // Sesuaikan dengan field yang ada di Firestore
+                                String description = document.getString("description"); // Sesuaikan dengan field yang ada di Firestore
+                                String imageUrl = document.getString("imageUrl"); // Sesuaikan dengan field yang ada di Firestore
+
+                                Drink drink = new Drink(name, price, category, description, imageUrl);
                                 drink.setId(document.getId());
                                 drinklist.add(drink);
                             }
                             drinkAdapter.notifyDataSetChanged();
-                        }else{
+                        } else {
                             Toast.makeText(getApplicationContext(), "Data gagal di ambil!", Toast.LENGTH_SHORT).show();
                         }
                         progressDialog.dismiss();
@@ -131,6 +135,7 @@ public class DrinkPage extends AppCompatActivity {
                 });
     }
 
+    // Dalam metode performSearch()
     private void performSearch(String query) {
         drinklist.clear();
 
@@ -143,7 +148,14 @@ public class DrinkPage extends AppCompatActivity {
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                Drink drink = document.toObject(Drink.class);
+                                String name = document.getString("product");
+                                String price = document.getString("price");
+                                String category = document.getString("category"); // Sesuaikan dengan field yang ada di Firestore
+                                String description = document.getString("description"); // Sesuaikan dengan field yang ada di Firestore
+                                String imageUrl = document.getString("imageUrl"); // Sesuaikan dengan field yang ada di Firestore
+
+                                Drink drink = new Drink(name, price, category, description, imageUrl);
+                                drink.setId(document.getId());
                                 drinklist.add(drink);
                             }
                             drinkAdapter.notifyDataSetChanged();
