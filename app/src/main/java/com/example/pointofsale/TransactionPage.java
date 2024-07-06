@@ -41,62 +41,40 @@ public class TransactionPage extends AppCompatActivity {
 
     ProgressDialog progressDialog;
 
-    private void openFoodMenuDetailActivity(Food selectedFood) {
-        Intent intent = new Intent(TransactionPage.this, MenuDetailActivity.class);
-        intent.putExtra("name", selectedFood.getName());
-        intent.putExtra("price", selectedFood.getPrice());
-        intent.putExtra("category", selectedFood.getCategory());
-        intent.putExtra("description", selectedFood.getDescription());
-        intent.putExtra("imageUrl", selectedFood.getImageURL());
-        startActivity(intent);
-    }
-
-    private void openDrinkMenuDetailActivity(Drink selectedDrink) {
-        Intent intent = new Intent(TransactionPage.this, MenuDetailActivity.class);
-        intent.putExtra("name", selectedDrink.getName());
-        intent.putExtra("price", selectedDrink.getPrice());
-        startActivity(intent);
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transaction_page);
+
         btnBack = findViewById(R.id.btnBack);
         fabCart = findViewById(R.id.fabCart);
-
         foodView = findViewById(R.id.rec_food);
         drinkView = findViewById(R.id.rec_drinks);
+
+        // Setup Firebase Database Reference
         databaseReference = FirebaseDatabase.getInstance().getReference();
 
+        // Setup RecyclerView for drinks
         drinkView.setHasFixedSize(true);
-        drinklist = new ArrayList<>();
-
-        foodView.setHasFixedSize(true);
-        foodlist = new ArrayList<>();
-
-        drinkAdapter = new DrinkAdapter(getApplicationContext(), drinklist);
-        drinkView.setAdapter(drinkAdapter);
-
-        // Set the layoutManager and decoration for drinkView
-        RecyclerView.LayoutManager layoutManagerDrink = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false);
-        RecyclerView.ItemDecoration decorationDrink = new DividerItemDecoration(getApplicationContext(), DividerItemDecoration.VERTICAL);
+        RecyclerView.LayoutManager layoutManagerDrink = new LinearLayoutManager(this);
         drinkView.setLayoutManager(layoutManagerDrink);
-        drinkView.addItemDecoration(decorationDrink);
+        drinkAdapter = new DrinkAdapter(this, drinklist);
+        drinkView.setAdapter(drinkAdapter);
+        drinkView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
 
-        foodAdapter = new FoodAdapter(getApplicationContext(), foodlist);
-        foodView.setAdapter(foodAdapter);
-
-        // Set the layoutManager and decoration for foodView
-        RecyclerView.LayoutManager layoutManagerFood = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false);
-        RecyclerView.ItemDecoration decorationFood = new DividerItemDecoration(getApplicationContext(), DividerItemDecoration.VERTICAL);
+        // Setup RecyclerView for foods
+        foodView.setHasFixedSize(true);
+        RecyclerView.LayoutManager layoutManagerFood = new LinearLayoutManager(this);
         foodView.setLayoutManager(layoutManagerFood);
-        foodView.addItemDecoration(decorationFood);
+        foodAdapter = new FoodAdapter(this, foodlist);
+        foodView.setAdapter(foodAdapter);
+        foodView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
 
-        progressDialog = new ProgressDialog(TransactionPage.this);
+        progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("Loading");
-        progressDialog.setMessage("Mengambil data...");
+        progressDialog.setMessage("Fetching data...");
 
+        // Button to navigate back to home page
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -105,34 +83,31 @@ public class TransactionPage extends AppCompatActivity {
             }
         });
 
+        // Setup click listener for food items
         foodAdapter.setOnItemClickListener(new FoodAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(int position) {
                 Food selectedFood = foodlist.get(position);
-                openFoodMenuDetailActivity(selectedFood);
+                openMenuDetailActivity(selectedFood);
             }
         });
 
-        // Set up OnClickListener for DrinkAdapter
+        // Setup click listener for drink items
         drinkAdapter.setOnItemClickListener(new DrinkAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(int position) {
                 Drink selectedDrink = drinklist.get(position);
-                openDrinkMenuDetailActivity(selectedDrink);
+                openMenuDetailActivity(selectedDrink);
             }
         });
 
+        // Floating action button for cart
         fabCart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Di sini, Anda perlu menentukan cara pengguna memilih item dan kuantitasnya
-                // Saya asumsikan bahwa foodlist dan drinklist adalah item yang mungkin dipilih
-                ArrayList<String> selectedMenus = new ArrayList<>();
-                ArrayList<Integer> selectedQuantities = new ArrayList<>();
-                Intent cartIntent = new Intent(TransactionPage.this, CartPage.class);
-                cartIntent.putStringArrayListExtra("menus", selectedMenus);
-                cartIntent.putIntegerArrayListExtra("quantities", selectedQuantities);
-                startActivity(cartIntent);
+                // Here you would implement logic for adding items to cart
+                // For simplicity, assuming you navigate to a cart page
+                startActivity(new Intent(TransactionPage.this, CartPage.class));
             }
         });
     }
@@ -140,19 +115,20 @@ public class TransactionPage extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        getDrinkData();
-        getFoodData();
+        // Fetch data from Firebase
+        fetchDrinkData();
+        fetchFoodData();
     }
 
-    private void getDrinkData() {
+    private void fetchDrinkData() {
         progressDialog.show();
         DatabaseReference drinkRef = databaseReference.child("menu").child("drink");
         drinkRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 drinklist.clear();
-                for (DataSnapshot drinkSnapshot : snapshot.getChildren()) {
-                    Drink drink = drinkSnapshot.getValue(Drink.class);
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    Drink drink = dataSnapshot.getValue(Drink.class);
                     drinklist.add(drink);
                 }
                 drinkAdapter.notifyDataSetChanged();
@@ -161,21 +137,21 @@ public class TransactionPage extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(getApplicationContext(), "Data gagal di ambil!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(TransactionPage.this, "Failed to retrieve drink data!", Toast.LENGTH_SHORT).show();
                 progressDialog.dismiss();
             }
         });
     }
 
-    private void getFoodData() {
+    private void fetchFoodData() {
         progressDialog.show();
         DatabaseReference foodRef = databaseReference.child("menu").child("food");
         foodRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 foodlist.clear();
-                for (DataSnapshot foodSnapshot : snapshot.getChildren()) {
-                    Food food = foodSnapshot.getValue(Food.class);
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    Food food = dataSnapshot.getValue(Food.class);
                     foodlist.add(food);
                 }
                 foodAdapter.notifyDataSetChanged();
@@ -184,9 +160,28 @@ public class TransactionPage extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(getApplicationContext(), "Data gagal di ambil!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(TransactionPage.this, "Failed to retrieve food data!", Toast.LENGTH_SHORT).show();
                 progressDialog.dismiss();
             }
         });
+    }
+
+    // Method to open menu detail activity
+    private void openMenuDetailActivity(Food food) {
+        Intent intent = new Intent(TransactionPage.this, MenuDetailActivity.class);
+        intent.putExtra("name", food.getName());
+        intent.putExtra("price", food.getPrice());
+        intent.putExtra("category", food.getCategory());
+        intent.putExtra("description", food.getDescription());
+        intent.putExtra("imageURL", food.getImageURL());
+        startActivity(intent);
+    }
+
+    // Method to open menu detail activity for drinks
+    private void openMenuDetailActivity(Drink drink) {
+        Intent intent = new Intent(TransactionPage.this, MenuDetailActivity.class);
+        intent.putExtra("name", drink.getName());
+        intent.putExtra("price", drink.getPrice());
+        startActivity(intent);
     }
 }

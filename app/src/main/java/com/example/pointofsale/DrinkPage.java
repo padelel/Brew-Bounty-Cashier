@@ -105,8 +105,9 @@ public class DrinkPage extends AppCompatActivity {
                     String description = snapshot.child("description").getValue(String.class);
                     String imageURL = snapshot.child("imageURL").getValue(String.class);
                     String price = snapshot.child("price").getValue(String.class);
+                    String stock = snapshot.child("stock").getValue(String.class); // Ambil nilai stock sebagai string
 
-                    Drink drink = new Drink(name, category, description, imageURL, price);
+                    Drink drink = new Drink(name, category, description, imageURL, price, stock); // Masukkan stock ke constructor
                     drink.setId(id);
                     drinklist.add(drink);
                 }
@@ -136,8 +137,9 @@ public class DrinkPage extends AppCompatActivity {
                     String description = snapshot.child("description").getValue(String.class);
                     String imageURL = snapshot.child("imageURL").getValue(String.class);
                     String price = snapshot.child("price").getValue(String.class);
+                    String stock = snapshot.child("stock").getValue(String.class); // Ambil nilai stock sebagai string
 
-                    Drink drink = new Drink(name, category, description, imageURL, price);
+                    Drink drink = new Drink(name, category, description, imageURL, price, stock); // Masukkan stock ke constructor
                     drink.setId(id);
                     drinklist.add(drink);
                 }

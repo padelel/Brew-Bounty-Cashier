@@ -61,6 +61,7 @@ public class DrinkAdapter extends RecyclerView.Adapter<DrinkAdapter.DrinkViewHol
         holder.category.setText(currentDrink.getCategory());
         holder.description.setText(currentDrink.getDescription());
         holder.price.setText(String.valueOf(currentDrink.getPrice()));
+        holder.stock.setText(currentDrink.getStock()); // Set stock value
 
         // Log untuk memeriksa URL gambar sebelum dimuat
         Log.d(TAG, "Image URL: " + currentDrink.getImageURL());
@@ -82,6 +83,7 @@ public class DrinkAdapter extends RecyclerView.Adapter<DrinkAdapter.DrinkViewHol
             }
         });
 
+        // Example dialog implementation
         holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
@@ -100,9 +102,9 @@ public class DrinkAdapter extends RecyclerView.Adapter<DrinkAdapter.DrinkViewHol
         return mDrinkList.size();
     }
 
-    public static class DrinkViewHolder extends RecyclerView.ViewHolder {
+    public class DrinkViewHolder extends RecyclerView.ViewHolder {
 
-        TextView name, category, description, price;
+        TextView name, category, description, price, stock;
         ImageView imageView;
 
         public DrinkViewHolder(@NonNull View itemView) {
@@ -111,6 +113,7 @@ public class DrinkAdapter extends RecyclerView.Adapter<DrinkAdapter.DrinkViewHol
             category = itemView.findViewById(R.id.tvCategory);
             description = itemView.findViewById(R.id.tvDescription);
             price = itemView.findViewById(R.id.tvPrice);
+            stock = itemView.findViewById(R.id.tvStock); // Initialize the stock TextView
             imageView = itemView.findViewById(R.id.imageView);
         }
     }

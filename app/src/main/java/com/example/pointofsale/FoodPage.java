@@ -103,10 +103,11 @@ public class FoodPage extends AppCompatActivity {
                     String name = snapshot.child("name").getValue(String.class);
                     String category = snapshot.child("category").getValue(String.class);
                     String description = snapshot.child("description").getValue(String.class);
-                    String imageURL = snapshot.child("imageURL").getValue(String.class); // Ubah menjadi imageURL
-                    String price = snapshot.child("price").getValue(String.class); // Ambil harga sebagai String
+                    String imageURL = snapshot.child("imageURL").getValue(String.class);
+                    String price = snapshot.child("price").getValue(String.class);
+                    String stock = snapshot.child("stock").getValue(String.class);
 
-                    Food food = new Food(name, category, description, imageURL, price); // Gunakan imageURL
+                    Food food = new Food(name, category, description, imageURL, price, stock);
                     food.setId(id);
                     foodlist.add(food);
                 }
@@ -134,10 +135,11 @@ public class FoodPage extends AppCompatActivity {
                     String name = snapshot.child("name").getValue(String.class);
                     String category = snapshot.child("category").getValue(String.class);
                     String description = snapshot.child("description").getValue(String.class);
-                    String imageURL = snapshot.child("imageURL").getValue(String.class); // Ubah menjadi imageURL
-                    String price = snapshot.child("price").getValue(String.class); // Ambil harga sebagai String
+                    String imageURL = snapshot.child("imageURL").getValue(String.class);
+                    String price = snapshot.child("price").getValue(String.class);
+                    String stock = snapshot.child("stock").getValue(String.class);
 
-                    Food food = new Food(name, category, description, imageURL, price); // Gunakan imageURL
+                    Food food = new Food(name, category, description, imageURL, price, stock);
                     food.setId(id);
                     foodlist.add(food);
                 }

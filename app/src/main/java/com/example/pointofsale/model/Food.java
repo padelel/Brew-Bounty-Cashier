@@ -7,13 +7,15 @@ public class Food {
     private String description;
     private String imageURL;
     private String price;
+    private String stock;
 
-    public Food(String name, String category, String description, String imageURL, String price) {
+    public Food(String name, String category, String description, String imageURL, String price, String stock) {
         this.name = name;
         this.category = category;
         this.description = description;
         this.imageURL = imageURL;
         this.price = price;
+        this.stock = stock;
     }
 
     public String getId() {
@@ -62,5 +64,13 @@ public class Food {
 
     public void setPrice(String price) {
         this.price = price;
+    }
+
+    public String getStock() {
+        return stock;
+    }
+
+    public void setStock(String stock) {
+        this.stock = stock;
     }
 }

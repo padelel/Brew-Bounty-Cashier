@@ -61,6 +61,7 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder
         holder.category.setText(currentFood.getCategory());
         holder.description.setText(currentFood.getDescription());
         holder.price.setText(String.valueOf(currentFood.getPrice()));
+        holder.stock.setText(String.valueOf(currentFood.getStock())); // Set stock value
 
         // Log untuk memeriksa URL gambar sebelum dimuat
         Log.d(TAG, "Image URL: " + currentFood.getImageURL());
@@ -103,7 +104,7 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder
 
     public class FoodViewHolder extends RecyclerView.ViewHolder {
 
-        TextView name, category, description, price;
+        TextView name, category, description, price, stock;
         ImageView imageView;
 
         public FoodViewHolder(@NonNull View itemView) {
@@ -112,6 +113,7 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodViewHolder
             category = itemView.findViewById(R.id.tvCategory);
             description = itemView.findViewById(R.id.tvDescription);
             price = itemView.findViewById(R.id.tvPrice);
+            stock = itemView.findViewById(R.id.tvStock); // Initialize the stock TextView
             imageView = itemView.findViewById(R.id.imageView);
         }
     }
