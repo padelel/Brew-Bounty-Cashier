@@ -10,7 +10,8 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.pointofsale.model.Pesanan;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class MenuDetailActivity extends AppCompatActivity {
 
@@ -18,14 +19,14 @@ public class MenuDetailActivity extends AppCompatActivity {
     EditText edtJumlah;
     TextView txtNamaMenuDetail;
     TextView txtHargaMenuDetail;
-    private FirebaseFirestore db;
+    private DatabaseReference dbRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transaction);
 
-        db = FirebaseFirestore.getInstance();
+        dbRef = FirebaseDatabase.getInstance().getReference("pesanan");
         txtNamaMenuDetail = findViewById(R.id.txtNamaMenuDetail);
         txtHargaMenuDetail = findViewById(R.id.txtHargaMenuDetail);
         edtJumlah = findViewById(R.id.edt_jumlah);
@@ -84,10 +85,9 @@ public class MenuDetailActivity extends AppCompatActivity {
         // Membuat objek pesanan
         Pesanan pesanan = new Pesanan(menu, harga, kuantitas);
 
-        // Menyimpan data ke Firestore
-        db.collection("pesanan")
-                .add(pesanan)
-                .addOnSuccessListener(documentReference -> {
+        // Menyimpan data ke Realtime Database
+        dbRef.push().setValue(pesanan)
+                .addOnSuccessListener(aVoid -> {
                     // Data berhasil disimpan
                     // Tambahkan logika atau pindah ke aktivitas lain jika diperlukan
                     startActivity(new Intent(MenuDetailActivity.this, CartPage.class));

@@ -8,10 +8,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,7 +18,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.pointofsale.adapter.OrderAdapter;
 import com.example.pointofsale.model.Order;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +62,8 @@ public class OrderPage extends AppCompatActivity {
                     public void onClick(DialogInterface dialogInterface, int i) {
                         switch (i) {
                             case 0:
-                                deleteData(orderlist.get(pos).getId());
+                                String orderId = orderlist.get(pos).getOrderId(); // Menggunakan orderId sebagai contoh
+                                deleteData(orderId);
                                 break;
                         }
                     }
@@ -70,6 +71,7 @@ public class OrderPage extends AppCompatActivity {
                 dialog.show();
             }
         });
+
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false);
         RecyclerView.ItemDecoration decoration = new DividerItemDecoration(getApplicationContext(), DividerItemDecoration.VERTICAL);
@@ -129,7 +131,6 @@ public class OrderPage extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 Order order = document.toObject(Order.class);
-                                order.setId(document.getId());
                                 orderlist.add(order);
                             }
                             orderAdapter.notifyDataSetChanged();

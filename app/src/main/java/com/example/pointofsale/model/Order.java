@@ -3,31 +3,19 @@ package com.example.pointofsale.model;
 import java.util.List;
 
 public class Order {
-    private String id, customerName, orderId;
+    private String customerName;
+    private String orderId;
     private List<CartItem> cartItems;
+    private double totalPrice; // New attribute for total price
 
-    // Konstruktor tanpa argumen
-    public Order() {
-        // Kosongkan atau isi dengan nilai default jika diperlukan
-    }
-
-    // Konstruktor dengan argumen
-    public Order(String customerName, String orderId, List<CartItem> cartItems) {
+    public Order(String customerName, String orderId, List<CartItem> cartItems, double totalPrice) {
         this.customerName = customerName;
         this.orderId = orderId;
         this.cartItems = cartItems;
+        this.totalPrice = totalPrice;
     }
 
-    // ... (getter and setter methods)
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
+    // Add getters and setters
     public String getCustomerName() {
         return customerName;
     }
@@ -50,5 +38,13 @@ public class Order {
 
     public void setCartItems(List<CartItem> cartItems) {
         this.cartItems = cartItems;
+    }
+
+    public double getTotalPrice() {
+        return totalPrice;
+    }
+
+    public void setTotalPrice(double totalPrice) {
+        this.totalPrice = totalPrice;
     }
 }
