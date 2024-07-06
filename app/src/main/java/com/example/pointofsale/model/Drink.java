@@ -9,6 +9,10 @@ public class Drink {
     private String price;
     private String stock;
 
+    // No-argument constructor
+    public Drink() {
+    }
+
     public Drink(String name, String category, String description, String imageURL, String price, String stock) {
         this.name = name;
         this.category = category;
