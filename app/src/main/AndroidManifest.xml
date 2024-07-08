@@ -24,7 +24,7 @@
             android:name=".AddCustomer"
             android:exported="true" />
         <activity
-            android:name=".OrderPage"
+            android:name=".OrderActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustPan" />
         <activity

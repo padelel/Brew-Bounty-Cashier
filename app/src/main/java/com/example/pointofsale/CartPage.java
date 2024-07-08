@@ -23,8 +23,10 @@ import com.example.pointofsale.model.Order;
 import com.example.pointofsale.model.Pesanan;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseException;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -46,6 +48,7 @@ public class CartPage extends AppCompatActivity {
     double totalHarga = 0; // Menyimpan total harga
     private boolean isCustomerAdded = false;
     private String orderId; // Menyimpan ID pesanan yang baru dibuat
+    private Customer selectedCustomer; // Menyimpan data customer yang dipilih
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,8 +79,8 @@ public class CartPage extends AppCompatActivity {
         customerAdapter.setDialog(new CustomerAdapter.Dialog() {
             @Override
             public void onClick(int pos) {
-                Customer clickedCustomer = customerList.get(pos);
-                addCustomerToRecords(clickedCustomer);
+                selectedCustomer = customerList.get(pos); // Menyimpan customer yang dipilih
+                Toast.makeText(CartPage.this, "Customer " + selectedCustomer.getName() + " selected", Toast.LENGTH_SHORT).show();
             }
         });
         customerView.setAdapter(customerAdapter);
@@ -90,7 +93,11 @@ public class CartPage extends AppCompatActivity {
         btnSaveOrder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                saveOrderToDatabase();
+                if (selectedCustomer == null) {
+                    Toast.makeText(CartPage.this, "Pilih customer terlebih dahulu", Toast.LENGTH_SHORT).show();
+                } else {
+                    saveOrderToDatabase();
+                }
             }
         });
 
@@ -146,7 +153,8 @@ public class CartPage extends AppCompatActivity {
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     Pesanan pesanan = dataSnapshot.getValue(Pesanan.class);
 
-                    CartItem cartItem = new CartItem(pesanan.getMenu(), pesanan.getHarga(), pesanan.getKuantitas());
+                    // Periksa urutan parameter di sini, pastikan `harga` dan `kuantitas` dalam urutan yang benar
+                    CartItem cartItem = new CartItem(pesanan.getMenu(), pesanan.getKuantitas(), pesanan.getHarga());
 
                     cartItemList.add(cartItem);
 
@@ -169,7 +177,7 @@ public class CartPage extends AppCompatActivity {
     private void getData() {
         progressDialog.show();
 
-        dbRef.child("customer").addListenerForSingleValueEvent(new ValueEventListener() {
+        dbRef.child("customers").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 customerList.clear();
@@ -204,7 +212,7 @@ public class CartPage extends AppCompatActivity {
     private void performSearch(String query) {
         customerList.clear();
 
-        dbRef.child("customer").orderByChild("name").startAt(query).endAt(query + "\uf8ff")
+        dbRef.child("customers").orderByChild("name").startAt(query).endAt(query + "\uf8ff")
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -222,6 +230,22 @@ public class CartPage extends AppCompatActivity {
                 });
     }
 
+    private List<Order.CartItem> convertToOrderCartItemList(List<CartItem> cartItems) {
+        List<Order.CartItem> orderCartItems = new ArrayList<>();
+
+        for (CartItem cartItem : cartItems) {
+            Order.CartItem orderCartItem = new Order.CartItem(
+                    cartItem.getMenu(),
+                    cartItem.getKuantitas(),
+                    cartItem.getHarga()
+            );
+            orderCartItems.add(orderCartItem);
+        }
+
+        return orderCartItems;
+    }
+
+
     private void saveOrderToDatabase() {
         DatabaseReference orderRef = dbRef.child("order");
 
@@ -234,9 +258,10 @@ public class CartPage extends AppCompatActivity {
             if (result) {
                 Toast.makeText(CartPage.this, "Pesanan sudah pernah disimpan sebelumnya!", Toast.LENGTH_SHORT).show();
             } else {
-                String customerName = cartItemList.get(cartItemList.size() - 1).getMenu();
+                String customerName = selectedCustomer.getName(); // Menggunakan nama customer yang dipilih
                 double totalPrice = calculateTotalPrice(cartItemList);
-                Order order = new Order(customerName, orderId, cartItemList, totalPrice);
+                List<Order.CartItem> orderCartItems = convertToOrderCartItemList(cartItemList);
+                Order order = new Order(customerName, orderId, orderCartItems, totalPrice);
 
                 orderId = generateAutomaticOrderId();
                 order.setOrderId(orderId);
@@ -247,6 +272,9 @@ public class CartPage extends AppCompatActivity {
                                 Log.d("CartPage", "Pesanan berhasil disimpan! Order ID: " + orderId);
                                 Toast.makeText(CartPage.this, "Pesanan disimpan!", Toast.LENGTH_SHORT).show();
 
+                                // Kurangi stok item dari menu
+                                reduceStock();
+
                                 clearOrderFromDatabase();
 
                                 totalHarga = 0;
@@ -255,76 +283,105 @@ public class CartPage extends AppCompatActivity {
 
                                 cartItemList.clear();
                                 isCustomerAdded = false;
+                                selectedCustomer = null;
                                 cartAdapter.notifyDataSetChanged();
                             } else {
                                 Log.e("CartPage", "Gagal menyimpan pesanan!", task.getException());
-                                Toast.makeText(CartPage.this, "Gagal menyimpan pesanan!", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(CartPage.this, "Pesanan gagal disimpan!", Toast.LENGTH_SHORT).show();
                             }
                         });
             }
         });
     }
 
-    private double calculateTotalPrice(List<CartItem> cartItems) {
-        double totalPrice = 0;
-        for (CartItem cartItem : cartItems) {
-            totalPrice += cartItem.getKuantitas() * cartItem.getHarga();
+    private void reduceStock() {
+        for (CartItem cartItem : cartItemList) {
+            String menuName = cartItem.getMenu();
+            int quantity = cartItem.getKuantitas();
+
+            // Kurangi stok untuk item food
+            DatabaseReference foodRef = dbRef.child("menu").child("food");
+            Query foodQuery = foodRef.orderByChild("name").equalTo(menuName);
+            foodQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                        Integer currentStock = null;
+                        try {
+                            currentStock = dataSnapshot.child("stock").getValue(Integer.class);
+                        } catch (DatabaseException e) {
+                            // Jika konversi langsung ke Integer gagal, coba konversi dari String ke Integer
+                            String stockString = dataSnapshot.child("stock").getValue(String.class);
+                            if (stockString != null) {
+                                currentStock = Integer.parseInt(stockString);
+                            }
+                        }
+
+                        if (currentStock != null) {
+                            int newStock = currentStock - quantity;
+                            String newStockString = String.valueOf(newStock);
+                            dataSnapshot.getRef().child("stock").setValue(newStockString);
+                        } else {
+                            Log.e("CartPage", "Stock is null or invalid for food item: " + menuName);
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Log.e("CartPage", "Gagal mengupdate stok food", error.toException());
+                }
+            });
+
+            // Kurangi stok untuk item drink
+            DatabaseReference drinkRef = dbRef.child("menu").child("drink");
+            Query drinkQuery = drinkRef.orderByChild("name").equalTo(menuName);
+            drinkQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                        Integer currentStock = null;
+                        try {
+                            currentStock = dataSnapshot.child("stock").getValue(Integer.class);
+                        } catch (DatabaseException e) {
+                            // Jika konversi langsung ke Integer gagal, coba konversi dari String ke Integer
+                            String stockString = dataSnapshot.child("stock").getValue(String.class);
+                            if (stockString != null) {
+                                currentStock = Integer.parseInt(stockString);
+                            }
+                        }
+
+                        if (currentStock != null) {
+                            int newStock = currentStock - quantity;
+                            String newStockString = String.valueOf(newStock);
+                            dataSnapshot.getRef().child("stock").setValue(newStockString);
+                        } else {
+                            Log.e("CartPage", "Stock is null or invalid for drink item: " + menuName);
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Log.e("CartPage", "Gagal mengupdate stok drink", error.toException());
+                }
+            });
         }
-        return totalPrice;
     }
 
-    private void isOrderAlreadySaved(final ResultCallback<Boolean> callback) {
+    private void isOrderAlreadySaved(final OrderCheckCallback callback) {
         DatabaseReference orderRef = dbRef.child("order");
-
         orderRef.orderByChild("orderId").equalTo(orderId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                boolean isOrderSaved = snapshot.exists();
-                callback.onCallback(isOrderSaved);
+                callback.onOrderCheck(snapshot.exists());
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(CartPage.this, "Gagal memeriksa pesanan!", Toast.LENGTH_SHORT).show();
-                callback.onCallback(false);
+                Log.e("CartPage", "Gagal memeriksa status pesanan!", error.toException());
             }
         });
-    }
-
-    private void updateTotalOrders() {
-        DatabaseReference totalOrdersRef = dbRef.child("total_orders");
-
-        totalOrdersRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                final int[] totalOrders = {snapshot.exists() ? snapshot.getValue(Integer.class) : 0};
-                totalOrders[0] += 1;
-
-                totalOrdersRef.setValue(totalOrders[0]).addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        Log.d("CartPage", "Total pesanan diperbarui: " + totalOrders[0]);
-                    } else {
-                        Log.e("CartPage", "Gagal memperbarui total pesanan", task.getException());
-                    }
-                });
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e("CartPage", "Gagal memperbarui total pesanan", error.toException());
-            }
-        });
-    }
-
-
-    private String generateAutomaticOrderId() {
-        long timestamp = System.currentTimeMillis();
-        String uniqueComponent = "";
-        return "ORDER_" + timestamp + "_" + uniqueComponent;
-    }
-
-    interface ResultCallback<T> {
-        void onCallback(T result);
     }
 
     private void clearOrderFromDatabase() {
@@ -336,16 +393,30 @@ public class CartPage extends AppCompatActivity {
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     dataSnapshot.getRef().removeValue();
                 }
-
-                cartItemList.clear();
-                cartAdapter.notifyDataSetChanged();
-                Toast.makeText(CartPage.this, "Pesanan dihapus!", Toast.LENGTH_SHORT).show();
+                Log.d("CartPage", "Pesanan berhasil dihapus dari Realtime Database.");
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(CartPage.this, "Gagal menghapus pesanan!", Toast.LENGTH_SHORT).show();
+                Log.e("CartPage", "Gagal menghapus pesanan dari Realtime Database", error.toException());
             }
         });
+    }
+
+    private String generateAutomaticOrderId() {
+        return String.valueOf(System.currentTimeMillis());
+    }
+
+    private double calculateTotalPrice(List<CartItem> cartItems) {
+        double totalPrice = 0.0;
+        for (CartItem item : cartItems) {
+            totalPrice += item.getHarga() * item.getKuantitas();
+        }
+        return totalPrice;
+    }
+
+    // Callback interface for order check
+    private interface OrderCheckCallback {
+        void onOrderCheck(boolean exists);
     }
 }

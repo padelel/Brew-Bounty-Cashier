@@ -52,7 +52,7 @@ public class HomePage extends AppCompatActivity {
         Order.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent open = new Intent(HomePage.this, OrderPage.class);
+                Intent open = new Intent(HomePage.this, OrderActivity.class);
                 startActivity(open);
             }
         });
