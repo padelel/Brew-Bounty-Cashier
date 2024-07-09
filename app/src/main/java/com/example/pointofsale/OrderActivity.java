@@ -1,7 +1,9 @@
 package com.example.pointofsale;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -26,6 +28,7 @@ public class OrderActivity extends AppCompatActivity {
     private OrderAdapter orderAdapter;
     private List<Order> orderList;
     private DatabaseReference dbRef;
+    private ImageView backButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +44,13 @@ public class OrderActivity extends AppCompatActivity {
 
         dbRef = FirebaseDatabase.getInstance().getReference("order");
         fetchDataFromDatabase();
+
+        backButton = findViewById(R.id.backbutton);
+        backButton.setOnClickListener(v -> {
+            Intent intent = new Intent(OrderActivity.this, HomePage.class);
+            startActivity(intent);
+            finish();
+        });
     }
 
     private void fetchDataFromDatabase() {

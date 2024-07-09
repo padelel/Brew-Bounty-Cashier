@@ -27,13 +27,16 @@ public class MenuDetailActivity extends AppCompatActivity {
     TextView txtNamaMenuDetail;
     TextView txtHargaMenuDetail;
     private DatabaseReference dbRef;
+    private DatabaseReference pesananRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transaction);
 
-        dbRef = FirebaseDatabase.getInstance().getReference("pesanan");
+        dbRef = FirebaseDatabase.getInstance().getReference();
+        pesananRef = dbRef.child("pesanan");
+
         txtNamaMenuDetail = findViewById(R.id.txtNamaMenuDetail);
         txtHargaMenuDetail = findViewById(R.id.txtHargaMenuDetail);
         edtJumlah = findViewById(R.id.edt_jumlah);
@@ -114,21 +117,8 @@ public class MenuDetailActivity extends AppCompatActivity {
                         }
 
                         if (currentStock != null && currentStock >= kuantitas) {
-                            // Membuat objek pesanan
-                            Pesanan pesanan = new Pesanan(menu, harga, kuantitas);
-
-                            // Menyimpan data ke Realtime Database
-                            dbRef.push().setValue(pesanan)
-                                    .addOnSuccessListener(aVoid -> {
-                                        // Data berhasil disimpan
-                                        // Tambahkan logika atau pindah ke aktivitas lain jika diperlukan
-                                        startActivity(new Intent(MenuDetailActivity.this, CartPage.class));
-                                    })
-                                    .addOnFailureListener(e -> {
-                                        // Gagal menyimpan data
-                                        e.printStackTrace();
-                                        // Tambahkan penanganan kesalahan sesuai kebutuhan
-                                    });
+                            // Memeriksa apakah item sudah ada di keranjang
+                            isItemInCart(menu, harga, kuantitas);
                         } else {
                             // Tampilkan pesan bahwa stok tidak mencukupi
                             Toast.makeText(MenuDetailActivity.this, "Stok tidak mencukupi", Toast.LENGTH_SHORT).show();
@@ -168,21 +158,8 @@ public class MenuDetailActivity extends AppCompatActivity {
                         }
 
                         if (currentStock != null && currentStock >= kuantitas) {
-                            // Membuat objek pesanan
-                            Pesanan pesanan = new Pesanan(menu, harga, kuantitas);
-
-                            // Menyimpan data ke Realtime Database
-                            dbRef.push().setValue(pesanan)
-                                    .addOnSuccessListener(aVoid -> {
-                                        // Data berhasil disimpan
-                                        // Tambahkan logika atau pindah ke aktivitas lain jika diperlukan
-                                        startActivity(new Intent(MenuDetailActivity.this, CartPage.class));
-                                    })
-                                    .addOnFailureListener(e -> {
-                                        // Gagal menyimpan data
-                                        e.printStackTrace();
-                                        // Tambahkan penanganan kesalahan sesuai kebutuhan
-                                    });
+                            // Memeriksa apakah item sudah ada di keranjang
+                            isItemInCart(menu, harga, kuantitas);
                         } else {
                             // Tampilkan pesan bahwa stok tidak mencukupi
                             Toast.makeText(MenuDetailActivity.this, "Stok tidak mencukupi", Toast.LENGTH_SHORT).show();
@@ -202,9 +179,40 @@ public class MenuDetailActivity extends AppCompatActivity {
         });
     }
 
+    private void isItemInCart(String menu, int harga, int kuantitas) {
+        pesananRef.orderByChild("menu").equalTo(menu).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!snapshot.exists()) {
+                    // Item belum ada di keranjang, tambahkan ke database
+                    Pesanan pesanan = new Pesanan(menu, harga, kuantitas);
+                    pesananRef.push().setValue(pesanan)
+                            .addOnSuccessListener(aVoid -> {
+                                // Data berhasil disimpan
+                                startActivity(new Intent(MenuDetailActivity.this, CartPage.class));
+                            })
+                            .addOnFailureListener(e -> {
+                                // Gagal menyimpan data
+                                e.printStackTrace();
+                                Toast.makeText(MenuDetailActivity.this, "Gagal menambahkan pesanan", Toast.LENGTH_SHORT).show();
+                            });
+                } else {
+                    // Item sudah ada dalam keranjang
+                    Toast.makeText(MenuDetailActivity.this, "Item sudah ada dalam keranjang", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Handle error
+                error.toException().printStackTrace();
+                Toast.makeText(MenuDetailActivity.this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     public void cancelPesanan() {
         // Implement the cancel order logic here
-        // For example, you can finish the current activity
         finish();
     }
 }
