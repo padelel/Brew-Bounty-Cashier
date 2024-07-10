@@ -149,6 +149,9 @@ public class CartPage extends AppCompatActivity implements CartAdapter.CartAdapt
                     if (!isItemInCart(pesanan.getMenu(), dataSnapshot.getKey())) { // Assuming getKey() gives the unique ID
                         // Pastikan urutan parameter `menu`, `kuantitas`, dan `harga` sesuai dengan konstruktor CartItem
                         CartItem cartItem = new CartItem(dataSnapshot.getKey(), pesanan.getMenu(), pesanan.getKuantitas(), pesanan.getHarga());
+
+                        String imageURL = pesanan.getImageURL();
+                        cartItem.setImageURL(imageURL);
                         cartItemList.add(cartItem);
 
                         totalHarga += (cartItem.getKuantitas() * cartItem.getHarga());
@@ -169,7 +172,6 @@ public class CartPage extends AppCompatActivity implements CartAdapter.CartAdapt
                 Log.e("CartPage", "Failed to read data from Realtime Database", error.toException());
             }
         });
-
     }
 
 // Metode untuk mengecek apakah item sudah ada di dalam cart

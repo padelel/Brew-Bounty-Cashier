@@ -5,6 +5,7 @@ public class CartItem {
     private String menu;
     private int quantity;
     private int unitPrice;
+    private String imageURL;
 
     public CartItem(String id, String menu, int quantity, int unitPrice) {
         this.id = id;
@@ -41,4 +42,8 @@ public class CartItem {
     public double getTotalPrice() {
         return quantity * unitPrice;
     }
+
+    public String getImageURL(){return imageURL;}
+
+    public void setImageURL(String imageURL) {this.imageURL = imageURL;}
 }

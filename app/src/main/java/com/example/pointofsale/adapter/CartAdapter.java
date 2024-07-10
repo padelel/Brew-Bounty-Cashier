@@ -4,6 +4,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -72,6 +73,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
         TextView txtMenuName;
         TextView txtQuantity;
         TextView txtTotalPrice;
+        ImageView menuImage;
         Button btnIncrease;
         Button btnDecrease;
         Button btnDelete;
@@ -81,6 +83,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
             txtMenuName = itemView.findViewById(R.id.txt_pesanan);
             txtQuantity = itemView.findViewById(R.id.txt_quantity);
             txtTotalPrice = itemView.findViewById(R.id.txt_jmlharga);
+            menuImage = itemView.findViewById(R.id.menuimage);
             btnIncrease = itemView.findViewById(R.id.btn_increase);
             btnDecrease = itemView.findViewById(R.id.btn_decrease);
             btnDelete = itemView.findViewById(R.id.btn_delete);

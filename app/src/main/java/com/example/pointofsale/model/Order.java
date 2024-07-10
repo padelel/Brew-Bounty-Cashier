@@ -6,6 +6,8 @@ public class Order {
     private String customerName;
     private String orderId;
     private List<CartItem> cartItems; // Menggunakan List<CartItem> di sini
+
+    String imageURL;
     private double totalPrice;
 
     public Order() {
@@ -43,6 +45,14 @@ public class Order {
 
     public void setCartItems(List<CartItem> cartItems) {
         this.cartItems = cartItems;
+    }
+
+    public String getImageURL() {
+        return imageURL;
+    }
+
+    public void setImageURL(String imageURL) {
+        this.imageURL = imageURL;
     }
 
     public double getTotalPrice() {

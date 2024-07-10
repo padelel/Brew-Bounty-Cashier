@@ -8,83 +8,143 @@
     app:cardCornerRadius="8dp"
     app:cardElevation="8dp">
 
-    <LinearLayout
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:orientation="vertical">
+        android:padding="16dp">
 
-        <LinearLayout
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:orientation="horizontal">
+            android:text="Customer Name :"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:id="@+id/label_customer_name"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Customer Name :"
-                android:textColor="@color/black"
-                android:textSize="18sp"
-                android:textStyle="bold"/>
+        <TextView
+            android:id="@+id/tvcustomername"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            app:layout_constraintStart_toEndOf="@id/label_customer_name"
+            app:layout_constraintTop_toTopOf="@id/label_customer_name"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_chainStyle="spread_inside" />
 
-            <TextView
-                android:id="@+id/tvcustomername"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:textColor="@color/black"
-                android:textSize="20sp" />
-
-        </LinearLayout>
-
-        <LinearLayout
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:orientation="horizontal">
+            android:text="Order ID :"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:id="@+id/label_order_id"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/label_customer_name"
+            android:layout_marginTop="8dp"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Order ID :"
-                android:textColor="@color/black"
-                android:textSize="18sp"
-                android:textStyle="bold"/>
+        <TextView
+            android:id="@+id/tvorderid"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            app:layout_constraintStart_toEndOf="@id/label_order_id"
+            app:layout_constraintTop_toTopOf="@id/label_order_id"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_chainStyle="spread_inside" />
 
-            <TextView
-                android:id="@+id/tvorderid"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:textColor="@color/black"
-                android:textSize="20sp" />
+        <!-- ImageView ditempatkan antara label_order_id dan label_menu_name -->
+        <ImageView
+            android:id="@+id/menuimage"
+            android:layout_width="345dp"
+            android:layout_height="125dp"
+            android:layout_gravity="center"
+            android:layout_marginRight="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/label_order_id"
+            app:layout_constraintBottom_toTopOf="@id/label_menu_name"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp" />
 
-        </LinearLayout>
-
-        <LinearLayout
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:orientation="horizontal">
+            android:text="Menu Name :"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:id="@+id/label_menu_name"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/menuimage"
+            android:layout_marginTop="8dp"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Cart Items :"
-                android:textColor="@color/black"
-                android:textSize="18sp"
-                android:textStyle="bold"/>
+        <TextView
+            android:id="@+id/tvmenuname"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            app:layout_constraintStart_toEndOf="@id/label_menu_name"
+            app:layout_constraintTop_toTopOf="@id/label_menu_name"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_chainStyle="spread_inside" />
 
-            <TextView
-                android:id="@+id/tvcartitems"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:textColor="@color/black"
-                android:textSize="20sp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Price :"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:id="@+id/label_price"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/label_menu_name"
+            android:layout_marginTop="8dp"/>
 
-        </LinearLayout>
-    </LinearLayout>
+        <TextView
+            android:id="@+id/tvprice"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            app:layout_constraintStart_toEndOf="@id/label_price"
+            app:layout_constraintTop_toTopOf="@id/label_price"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_chainStyle="spread_inside" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Total Price :"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:id="@+id/label_total_price"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvprice"
+            android:layout_marginTop="16dp"/>
+
+        <TextView
+            android:id="@+id/tvtotalprice"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            app:layout_constraintStart_toEndOf="@id/label_total_price"
+            app:layout_constraintTop_toTopOf="@id/label_total_price"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_chainStyle="spread_inside" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.cardview.widget.CardView>
