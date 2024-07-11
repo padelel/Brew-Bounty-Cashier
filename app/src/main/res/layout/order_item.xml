@@ -3,10 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="16dp"
+    android:layout_margin="8dp"
     app:cardBackgroundColor="@color/white"
     app:cardCornerRadius="8dp"
-    app:cardElevation="8dp">
+    app:cardElevation="4dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -60,66 +60,26 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_chainStyle="spread_inside" />
 
-        <!-- ImageView ditempatkan antara label_order_id dan label_menu_name -->
-        <ImageView
-            android:id="@+id/menuimage"
-            android:layout_width="345dp"
-            android:layout_height="125dp"
-            android:layout_gravity="center"
-            android:layout_marginRight="16dp"
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Menu Items :"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:id="@+id/label_menu_items"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/label_order_id"
-            app:layout_constraintBottom_toTopOf="@id/label_menu_name"
+            app:layout_constraintTop_toBottomOf="@id/tvorderid"
+            android:layout_marginTop="8dp"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerview_menu_items"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Menu Name :"
-            android:textColor="@color/black"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:id="@+id/label_menu_name"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/menuimage"
-            android:layout_marginTop="8dp"/>
-
-        <TextView
-            android:id="@+id/tvmenuname"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:textColor="@color/black"
-            android:textSize="20sp"
-            app:layout_constraintStart_toEndOf="@id/label_menu_name"
-            app:layout_constraintTop_toTopOf="@id/label_menu_name"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_chainStyle="spread_inside" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Price :"
-            android:textColor="@color/black"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:id="@+id/label_price"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/label_menu_name"
-            android:layout_marginTop="8dp"/>
-
-        <TextView
-            android:id="@+id/tvprice"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:textColor="@color/black"
-            android:textSize="20sp"
-            app:layout_constraintStart_toEndOf="@id/label_price"
-            app:layout_constraintTop_toTopOf="@id/label_price"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_chainStyle="spread_inside" />
+            app:layout_constraintTop_toBottomOf="@id/label_menu_items"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -130,7 +90,7 @@
             android:textStyle="bold"
             android:id="@+id/label_total_price"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvprice"
+            app:layout_constraintTop_toBottomOf="@id/recyclerview_menu_items"
             android:layout_marginTop="16dp"/>
 
         <TextView

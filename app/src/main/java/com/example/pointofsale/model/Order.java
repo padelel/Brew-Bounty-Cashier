@@ -1,34 +1,23 @@
 package com.example.pointofsale.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Order {
-    private String customerName;
     private String orderId;
-    private List<CartItem> cartItems; // Menggunakan List<CartItem> di sini
-
-    String imageURL;
+    private String customerName;
+    private List<CartItem> cartItems;
     private double totalPrice;
 
     public Order() {
-        // Diperlukan untuk Firebase
+        // Default constructor required for Firebase
     }
 
-    public Order(String customerName, String orderId, List<CartItem> cartItems, double totalPrice) {
-        this.customerName = customerName;
+    public Order(String orderId, String customerName, List<CartItem> cartItems, double totalPrice) {
         this.orderId = orderId;
+        this.customerName = customerName;
         this.cartItems = cartItems;
         this.totalPrice = totalPrice;
-    }
-
-    // Getter dan Setter (atau gunakan @PropertyName di Firebase Realtime Database)
-
-    public String getCustomerName() {
-        return customerName;
-    }
-
-    public void setCustomerName(String customerName) {
-        this.customerName = customerName;
     }
 
     public String getOrderId() {
@@ -39,20 +28,20 @@ public class Order {
         this.orderId = orderId;
     }
 
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+
     public List<CartItem> getCartItems() {
         return cartItems;
     }
 
     public void setCartItems(List<CartItem> cartItems) {
         this.cartItems = cartItems;
-    }
-
-    public String getImageURL() {
-        return imageURL;
-    }
-
-    public void setImageURL(String imageURL) {
-        this.imageURL = imageURL;
     }
 
     public double getTotalPrice() {
@@ -63,23 +52,31 @@ public class Order {
         this.totalPrice = totalPrice;
     }
 
-    // Inner class Order.CartItem untuk menyesuaikan dengan struktur data di Firebase
+    // Convert List<CartItem> to List<MenuItem>
+    public List<MenuItem> convertToMenuItems() {
+        List<MenuItem> menuItems = new ArrayList<>();
+        for (CartItem cartItem : cartItems) {
+            MenuItem menuItem = new MenuItem(cartItem.getMenu(), cartItem.getHarga(), cartItem.getKuantitas());
+            menuItems.add(menuItem);
+        }
+        return menuItems;
+    }
+
+    // Definition of CartItem class
     public static class CartItem {
         private String menu;
-        private int kuantitas;
         private double harga;
+        private int kuantitas;
 
         public CartItem() {
-            // Diperlukan untuk Firebase
+            // Default constructor required for Firebase
         }
 
-        public CartItem(String menu, int kuantitas, double harga) {
+        public CartItem(String menu, double harga, int kuantitas) {
             this.menu = menu;
-            this.kuantitas = kuantitas;
             this.harga = harga;
+            this.kuantitas = kuantitas;
         }
-
-        // Getter dan Setter (atau gunakan @PropertyName di Firebase Realtime Database)
 
         public String getMenu() {
             return menu;
@@ -89,20 +86,20 @@ public class Order {
             this.menu = menu;
         }
 
-        public int getKuantitas() {
-            return kuantitas;
-        }
-
-        public void setKuantitas(int kuantitas) {
-            this.kuantitas = kuantitas;
-        }
-
         public double getHarga() {
             return harga;
         }
 
         public void setHarga(double harga) {
             this.harga = harga;
+        }
+
+        public int getKuantitas() {
+            return kuantitas;
+        }
+
+        public void setKuantitas(int kuantitas) {
+            this.kuantitas = kuantitas;
         }
     }
 }

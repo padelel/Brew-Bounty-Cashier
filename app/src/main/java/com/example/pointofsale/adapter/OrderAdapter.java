@@ -3,15 +3,15 @@ package com.example.pointofsale.adapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.pointofsale.R;
 import com.example.pointofsale.model.Order;
-import com.squareup.picasso.Picasso;
+import com.example.pointofsale.model.MenuItem;
 
 import java.text.NumberFormat;
 import java.util.List;
@@ -35,37 +35,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
     @Override
     public void onBindViewHolder(@NonNull OrderViewHolder holder, int position) {
         Order order = orderList.get(position);
-        holder.tvCustomerName.setText(order.getCustomerName());
-        holder.tvOrderId.setText(order.getOrderId());
-
-        Picasso.get()
-                .load(order.getImageURL())
-                .placeholder(R.drawable.placeholder_image)
-                .error(R.drawable.error_image)
-                .into(holder.menuImage);
-
-        StringBuilder menuItems = new StringBuilder();
-        StringBuilder prices = new StringBuilder();
-        double totalPrice = 0.0;
-        for (Order.CartItem item : order.getCartItems()) {
-            menuItems.append(item.getMenu());
-            prices.append("Rp")
-                    .append(NumberFormat.getNumberInstance(new Locale("id", "ID")).format(item.getHarga()))
-                    .append(" x ")
-                    .append(item.getKuantitas());
-            totalPrice += item.getHarga() * item.getKuantitas();
-        }
-
-        holder.tvMenuName.setText(menuItems.toString());
-        holder.tvPrice.setText(prices.toString());
-
-        // Buat format number angka uang indonesia
-        NumberFormat numberFormat = NumberFormat.getNumberInstance(new Locale("id", "ID"));
-        numberFormat.setMaximumFractionDigits(0);
-
-        // Masukkan angka yang sudah diformat
-        String formattedTotalPrice = numberFormat.format(totalPrice);
-        holder.tvTotalPrice.setText(String.format("Rp" + formattedTotalPrice));
+        holder.bind(order);
     }
 
     @Override
@@ -74,17 +44,38 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
     }
 
     static class OrderViewHolder extends RecyclerView.ViewHolder {
-        TextView tvCustomerName, tvOrderId, tvMenuName, tvPrice, tvTotalPrice;
-        ImageView menuImage;
+        TextView tvCustomerName, tvOrderId, tvTotalPrice;
+        RecyclerView recyclerViewMenuItems;
 
         public OrderViewHolder(@NonNull View itemView) {
             super(itemView);
             tvCustomerName = itemView.findViewById(R.id.tvcustomername);
             tvOrderId = itemView.findViewById(R.id.tvorderid);
-            tvMenuName = itemView.findViewById(R.id.tvmenuname);
-            tvPrice = itemView.findViewById(R.id.tvprice);
             tvTotalPrice = itemView.findViewById(R.id.tvtotalprice);
-            menuImage = itemView.findViewById(R.id.menuimage);
+            recyclerViewMenuItems = itemView.findViewById(R.id.recyclerview_menu_items);
+            recyclerViewMenuItems.setLayoutManager(new LinearLayoutManager(itemView.getContext()));
+        }
+
+        public void bind(Order order) {
+            // Bind data to views
+            tvCustomerName.setText(order.getCustomerName());
+            tvOrderId.setText(order.getOrderId());
+
+            // Convert CartItems to MenuItems
+            List<MenuItem> menuItems = order.convertToMenuItems();
+
+            // Set up the nested RecyclerView
+            MenuItemAdapter menuItemAdapter = new MenuItemAdapter(menuItems);
+            recyclerViewMenuItems.setAdapter(menuItemAdapter);
+
+            // Calculate total price
+            double totalPrice = order.getTotalPrice();
+
+            // Format total price to Indonesian Rupiah
+            NumberFormat numberFormat = NumberFormat.getNumberInstance(new Locale("id", "ID"));
+            numberFormat.setMaximumFractionDigits(0);
+            String formattedTotalPrice = numberFormat.format(totalPrice);
+            tvTotalPrice.setText(String.format("Rp%s", formattedTotalPrice));
         }
     }
 }

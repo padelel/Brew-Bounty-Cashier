@@ -79,6 +79,8 @@ public class CartPage extends AppCompatActivity implements CartAdapter.CartAdapt
             selectedCustomer = customerList.get(pos); // Menyimpan customer yang dipilih
             Toast.makeText(CartPage.this, "Customer " + selectedCustomer.getName() + " selected", Toast.LENGTH_SHORT).show();
             // Tidak ada penambahan customer ke dalam cartItemList
+            // Set orderId ke selectedCustomer.getName() setelah customer dipilih
+            orderId = selectedCustomer.getName();
         });
 
         customerView.setAdapter(customerAdapter);
@@ -122,9 +124,6 @@ public class CartPage extends AppCompatActivity implements CartAdapter.CartAdapt
                 return false;
             }
         });
-
-        // Generate an automatic order ID based on the current timestamp
-        orderId = generateAutomaticOrderId();
     }
 
     @Override
@@ -146,8 +145,7 @@ public class CartPage extends AppCompatActivity implements CartAdapter.CartAdapt
                     Pesanan pesanan = dataSnapshot.getValue(Pesanan.class);
 
                     // Periksa apakah item sudah ada di dalam list
-                    if (!isItemInCart(pesanan.getMenu(), dataSnapshot.getKey())) { // Assuming getKey() gives the unique ID
-                        // Pastikan urutan parameter `menu`, `kuantitas`, dan `harga` sesuai dengan konstruktor CartItem
+                    if (!isItemInCart(pesanan.getMenu(), dataSnapshot.getKey())) {
                         CartItem cartItem = new CartItem(dataSnapshot.getKey(), pesanan.getMenu(), pesanan.getKuantitas(), pesanan.getHarga());
 
                         String imageURL = pesanan.getImageURL();
@@ -184,8 +182,6 @@ public class CartPage extends AppCompatActivity implements CartAdapter.CartAdapt
         }
         return false;
     }
-
-
 
     private void getData() {
         progressDialog.show();
@@ -259,42 +255,51 @@ public class CartPage extends AppCompatActivity implements CartAdapter.CartAdapt
             if (result) {
                 Toast.makeText(CartPage.this, "Pesanan sudah pernah disimpan sebelumnya!", Toast.LENGTH_SHORT).show();
             } else {
-                String customerName = selectedCustomer.getName(); // Menggunakan nama customer yang dipilih
+                if (selectedCustomer == null) {
+                    Toast.makeText(CartPage.this, "Pilih customer terlebih dahulu", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                // Mengambil nama pelanggan yang dipilih
+                String customerName = selectedCustomer.getName();
+
+                // Menghitung total harga
                 double totalPrice = calculateTotalPrice(cartItemList);
+
+                // Konversi CartItem ke Order.CartItem
                 List<Order.CartItem> orderCartItems = convertToOrderCartItemList(cartItemList);
+
+                // Membuat objek Order
                 Order order = new Order(customerName, orderId, orderCartItems, totalPrice);
 
+                // Menghasilkan orderId baru untuk pesanan berikutnya
                 orderId = generateAutomaticOrderId();
                 order.setOrderId(orderId);
 
-                // Panggil reduceStock sebelum menyimpan pesanan
-                reduceStock(cartItemList, () -> {
-                    // Simpan pesanan ke database
-                    orderRef.push().setValue(order)
-                            .addOnCompleteListener(task -> {
-                                if (task.isSuccessful()) {
-                                    // Hapus node pesanan
-                                    clearPesananNode();
+                // Simpan pesanan ke database dengan customerName yang benar
+                orderRef.push().setValue(order)
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                // Hapus node pesanan setelah berhasil disimpan
+                                clearPesananNode();
 
-                                    // Bersihkan cart dan perbarui tampilan
-                                    cartItemList.clear();
-                                    cartAdapter.notifyDataSetChanged();
+                                // Bersihkan cart dan perbarui tampilan
+                                cartItemList.clear();
+                                cartAdapter.notifyDataSetChanged();
 
-                                    // Reset total harga
-                                    totalHarga = 0;
-                                    txtTotal.setText("Rp.0.00");
+                                // Reset total harga
+                                totalHarga = 0;
+                                txtTotal.setText("Rp.0.00");
 
-                                    Toast.makeText(CartPage.this, "Pesanan berhasil disimpan!", Toast.LENGTH_SHORT).show();
-                                } else {
-                                    Log.e("CartPage", "Error saving order", task.getException());
-                                    Toast.makeText(CartPage.this, "Gagal menyimpan pesanan!", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                });
+                                Toast.makeText(CartPage.this, "Pesanan berhasil disimpan!", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Log.e("CartPage", "Error saving order", task.getException());
+                                Toast.makeText(CartPage.this, "Gagal menyimpan pesanan!", Toast.LENGTH_SHORT).show();
+                            }
+                        });
             }
         });
     }
-
 
     private void reduceStock(List<CartItem> cartItems, final OnStockReducedListener listener) {
         DatabaseReference menuRef = FirebaseDatabase.getInstance().getReference("menu");
