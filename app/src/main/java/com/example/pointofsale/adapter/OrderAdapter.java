@@ -43,6 +43,11 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         return orderList.size();
     }
 
+    public void updateList(List<Order> newOrderList) {
+        this.orderList = newOrderList;
+        notifyDataSetChanged();
+    }
+
     static class OrderViewHolder extends RecyclerView.ViewHolder {
         TextView tvCustomerName, tvOrderId, tvTotalPrice;
         RecyclerView recyclerViewMenuItems;
@@ -57,21 +62,14 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         }
 
         public void bind(Order order) {
-            // Bind data to views
             tvCustomerName.setText(order.getCustomerName());
             tvOrderId.setText(order.getOrderId());
 
-            // Convert CartItems to MenuItems
             List<MenuItem> menuItems = order.convertToMenuItems();
-
-            // Set up the nested RecyclerView
             MenuItemAdapter menuItemAdapter = new MenuItemAdapter(menuItems);
             recyclerViewMenuItems.setAdapter(menuItemAdapter);
 
-            // Calculate total price
             double totalPrice = order.getTotalPrice();
-
-            // Format total price to Indonesian Rupiah
             NumberFormat numberFormat = NumberFormat.getNumberInstance(new Locale("id", "ID"));
             numberFormat.setMaximumFractionDigits(0);
             String formattedTotalPrice = numberFormat.format(totalPrice);

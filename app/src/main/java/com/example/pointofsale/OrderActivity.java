@@ -5,9 +5,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -29,6 +29,8 @@ public class OrderActivity extends AppCompatActivity {
     private List<Order> orderList;
     private DatabaseReference dbRef;
     private ImageView backButton;
+    private SearchView searchView;
+    private static final String TAG = "OrderActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +53,21 @@ public class OrderActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         });
+
+        searchView = findViewById(R.id.searchView);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                filterOrders(query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                filterOrders(newText);
+                return false;
+            }
+        });
     }
 
     private void fetchDataFromDatabase() {
@@ -70,8 +87,37 @@ public class OrderActivity extends AppCompatActivity {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Toast.makeText(OrderActivity.this, "Failed to load data", Toast.LENGTH_SHORT).show();
-                Log.e("OrderActivity", "Database error", error.toException());
+                Log.e(TAG, "Database error", error.toException());
             }
         });
+    }
+
+    void filterOrders(String query) {
+        if (query == null) {
+            query = ""; // Handle null query
+        }
+
+        List<Order> filteredList = new ArrayList<>();
+        for (Order order : orderList) {
+            String orderId = order.getOrderId();
+            String customerName = order.getCustomerName();
+            boolean matchesOrderId = orderId != null && orderId.toLowerCase().contains(query.toLowerCase());
+            boolean matchesCustomerName = customerName != null && customerName.toLowerCase().contains(query.toLowerCase());
+
+            boolean matchesMenuItem = false;
+            if (order.getCartItems() != null) {
+                for (Order.CartItem item : order.getCartItems()) {
+                    if (item.getMenu() != null && item.getMenu().toLowerCase().contains(query.toLowerCase())) {
+                        matchesMenuItem = true;
+                        break;
+                    }
+                }
+            }
+
+            if (matchesOrderId || matchesCustomerName || matchesMenuItem) {
+                filteredList.add(order);
+            }
+        }
+        orderAdapter.updateList(filteredList);
     }
 }
