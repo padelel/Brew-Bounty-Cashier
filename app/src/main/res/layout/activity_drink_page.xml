@@ -58,8 +58,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:queryBackground="@android:color/transparent"
-        app:queryHint="Enter drink name"
-        android:textColor="#FFFFFF" />
+        app:queryHint="Enter drink name" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/drink_view"

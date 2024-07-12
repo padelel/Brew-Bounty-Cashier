@@ -59,8 +59,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:queryBackground="@android:color/transparent"
-        app:queryHint="Enter Order ID or Cust name or Menu Name"
-        android:textColor="#FFFFFF" />
+        app:queryHint="Enter Order ID or Cust name or Menu Name" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
